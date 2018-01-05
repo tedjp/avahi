@@ -55,6 +55,8 @@ AvahiKey *avahi_key_new(const char *name, uint16_t class, uint16_t type) {
         return NULL;
     }
 
+    k->name_hash = avahi_domain_hash(k->name);
+
     k->ref = 1;
     k->clazz = class;
     k->type = type;
@@ -327,9 +329,11 @@ int avahi_key_equal(const AvahiKey *a, const AvahiKey *b) {
     if (a == b)
         return 1;
 
-    return avahi_domain_equal(a->name, b->name) &&
-        a->type == b->type &&
-        a->clazz == b->clazz;
+    return a->type == b->type &&
+        a->clazz == b->clazz &&
+        a->name_hash == b->name_hash &&
+        // names are already normalized/unescaped
+        strcasecmp(a->name, b->name) == 0;
 }
 
 int avahi_key_pattern_match(const AvahiKey *pattern, const AvahiKey *k) {
@@ -341,7 +345,8 @@ int avahi_key_pattern_match(const AvahiKey *pattern, const AvahiKey *k) {
     if (pattern == k)
         return 1;
 
-    return avahi_domain_equal(pattern->name, k->name) &&
+    return pattern->name_hash == k->name_hash &&
+        avahi_domain_equal(pattern->name, k->name) &&
         (pattern->type == k->type || pattern->type == AVAHI_DNS_TYPE_ANY) &&
         (pattern->clazz == k->clazz || pattern->clazz == AVAHI_DNS_CLASS_ANY);
 }
@@ -357,8 +362,7 @@ int avahi_key_is_pattern(const AvahiKey *k) {
 unsigned avahi_key_hash(const AvahiKey *k) {
     assert(k);
 
-    return
-        avahi_domain_hash(k->name) +
+    return k->name_hash +
         k->type +
         k->clazz;
 }

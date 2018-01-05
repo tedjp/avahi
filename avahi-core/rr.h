@@ -55,6 +55,7 @@ enum {
 typedef struct AvahiKey {
     int ref;           /**< Reference counter */
     char *name;        /**< Record name */
+    unsigned name_hash;/**< Record name hash for quick comparison */
     uint16_t clazz;    /**< Record class, one of the AVAHI_DNS_CLASS_xxx constants */
     uint16_t type;     /**< Record type, one of the AVAHI_DNS_TYPE_xxx constants */
 } AvahiKey;

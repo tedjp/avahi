@@ -233,6 +233,10 @@ int avahi_domain_equal(const char *a, const char *b) {
     if (a == b)
         return 1;
 
+    // Likely case: labels match & are encoded identically.
+    if (strcmp(a, b) == 0)
+        return 1;
+
     for (;;) {
         char ca[AVAHI_LABEL_MAX], cb[AVAHI_LABEL_MAX], *r;
 

@@ -60,10 +60,13 @@ static void enum_aux_records(AvahiServer *s, AvahiInterface *i, const char *name
     if (type == AVAHI_DNS_TYPE_ANY) {
         AvahiEntry *e;
 
+        unsigned name_hash = avahi_domain_hash(name);
+
         for (e = s->entries; e; e = e->entries_next)
             if (!e->dead &&
                 avahi_entry_is_registered(s, e, i) &&
                 e->record->key->clazz == AVAHI_DNS_CLASS_IN &&
+                name_hash == e->record->key->name_hash &&
                 avahi_domain_equal(name, e->record->key->name))
                 callback(s, e->record, e->flags & AVAHI_PUBLISH_UNIQUE, userdata);
 
